@@ -1,0 +1,16 @@
+[
+  {
+    "id": "R001",
+    "nome": "Omelete Francesa",
+    "ingredientes": ["Ovos", "Manteiga", "Sal"],
+    "custo_estimado": 15.50,
+    "avaliacao": 4.8
+  },
+  {
+    "id": "R002",
+    "nome": "Sopa de Cebola",
+    "ingredientes": ["Cebola", "Caldo", "Queijo"],
+    "custo_estimado": 22.00,
+    "avaliacao": 4.5
+  }
+]
