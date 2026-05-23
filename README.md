@@ -48,4 +48,5 @@ Sistema de gerenciamento de acervo culinário desenvolvido para otimizar operaç
 
 ### Inicialização
 ```bash
-python3 src/main.py
+py src/main.py
+```
