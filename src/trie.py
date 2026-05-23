@@ -40,11 +40,7 @@ class ArvoreTrie:
             no_atual = no_atual.filhos[letra]
 
         resultados = []
+
         self._coletar_ids(no_atual, resultados)
-        vistos = set()
-        ids_unicos = []
-        for rid in resultados:
-            if rid not in vistos:
-                vistos.add(rid)
-                ids_unicos.append(rid)
-        return ids_unicos
+       
+        return list(set(resultados))
