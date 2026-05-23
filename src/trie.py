@@ -15,9 +15,9 @@ class ArvoreTrie:
         no_atual = self.raiz                                   
 
         for letra in palavra:                                  
-            if letra not in no_atual.filhos                    
-                no_atual.filhos[letra] = NoTrie()                                  
-            no_atual = nos_atual.filhos[letra]                                   
+            if letra not in no_atual.filhos:
+                no_atual.filhos[letra] = NoTrie()
+            no_atual = no_atual.filhos[letra]
 
         no_atual.fim_palavra = True                                  
 
@@ -30,14 +30,21 @@ class ArvoreTrie:
     
         for filho in no.filhos.values():
             self._coletar_ids(filho, lista_resultados)
-
-    def bucar_prefixo(self, prefixo):
+    def buscar_prefixo(self, prefixo):
         prefixo = prefixo.lower()
         no_atual = self.raiz
 
         for letra in prefixo:
             if letra not in no_atual.filhos:
-                return[]
+                return []
             no_atual = no_atual.filhos[letra]
 
-        resultados = [] 
+        resultados = []
+        self._coletar_ids(no_atual, resultados)
+        vistos = set()
+        ids_unicos = []
+        for rid in resultados:
+            if rid not in vistos:
+                vistos.add(rid)
+                ids_unicos.append(rid)
+        return ids_unicos
