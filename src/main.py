@@ -1,82 +1,93 @@
 import json
 import os
 
-# Importando as estruturas que vocês criaram
 from hash import TabelaHash
 from trie import ArvoreTrie
+from guloso import recomendar_menu_guloso
 
 def carregar_dados():
-    # Como o main.py está dentro de src/, precisamos voltar uma pasta (..) 
-    # para achar a pasta data/ onde está o dataset.json
     caminho_atual = os.path.dirname(os.path.abspath(__file__))
     caminho_arquivo = os.path.join(caminho_atual, "..", "data", "dataset.json")
     
     if not os.path.exists(caminho_arquivo):
-        print(f"❌ Erro: Arquivo de banco de dados não encontrado em {caminho_arquivo}.")
+        print(f"Erro: Ficheiro de base de dados não encontrado em {caminho_arquivo}.")
         return []
     
     with open(caminho_arquivo, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 def main():
-    print("="*40)
-    print("👨‍🍳 INICIANDO O SISTEMA DO JACQUIN")
-    print("="*40)
-    
     receitas = carregar_dados()
     if not receitas:
         return
 
-    # Instanciando as estruturas da dupla
     investigador = TabelaHash(tamanho_inicial=10)
     busca_rapida = ArvoreTrie()
     
-    print("\n--- CARREGANDO RECEITAS NO MOTOR ---")
     for r in receitas:
-        # Inserindo na Hash do Gustavo
-        investigador.inserir(r['id'], r['nome'], r['ingredientes'])
+        id_receita = r.get('id')
+        nome = r.get('nome')
+        ingredientes = r.get('ingredientes')
+
+        if id_receita is None or nome is None or ingredientes is None:
+            continue
+
+        investigador.inserir(id_receita, nome, ingredientes)
+        busca_rapida.inserir(nome, id_receita)
+
+    while True:
+        print("\n" + "="*45)
+        print("MENU PRINCIPAL")
+        print("="*45)
+        print("1. Modo Consulta Rápida (Árvore Trie)")
+        print("2. Modo Investigação (Tabela Hash)")
+        print("3. Modo Chef - Recomendação (Guloso)")
+        print("0. Sair")
+        print("="*45)
         
-        # Inserindo na Trie do Tiago (usamos o nome da receita para a busca)
-        busca_rapida.inserir(r['nome'], r['id'])
+        opcao = input("Escolha uma opção: ")
 
-    # ---------------------------------------------------------
-    # TESTE 1: A Trie do Tiago (Modo Consulta Rápida)
-    # ---------------------------------------------------------
-    print("\n--- 🔍 TESTE: MODO BUSCA RÁPIDA (TRIE) ---")
-    termo_busca = "ome"
-    resultados_trie = busca_rapida.buscar_prefixo(termo_busca)
-    print(f"Procurando pelo prefixo '{termo_busca}':")
-    if resultados_trie:
-        print(f"✔️ Encontrado IDs: {resultados_trie}")
-    else:
-        print("❌ Nenhuma receita encontrada.")
+        if opcao == "1":
+            print("\n- MODO BUSCA RÁPIDA -")
+            termo = input("Digite o prefixo da receita: ")
+            resultados = busca_rapida.buscar_prefixo(termo)
+            if resultados:
+                print(f"Receitas encontradas: {resultados}")
+            else:
+                print("Nenhuma receita encontrada com esse prefixo.")
 
-    # ---------------------------------------------------------
-    # TESTE 2: A Hash do Gustavo (Modo Investigação)
-    # ---------------------------------------------------------
-    print("\n--- 🕵️ TESTE: MODO INVESTIGAÇÃO (HASH) ---")
-    receita_alvo = receitas[0]  # Vamos testar a Omelete Francesa (R001)
-    
-    # Simulação A: Verificando a receita original
-    status_ok = investigador.verificar_integridade(
-        receita_alvo['id'], 
-        receita_alvo['nome'], 
-        receita_alvo['ingredientes']
-    )
-    print(f"Status da '{receita_alvo['nome']}' original: {'✔️ Íntegra' if status_ok else '❌ Corrompida'}")
+        elif opcao == "2":
+            print("\n- MODO INVESTIGAÇÃO -")
+            print("Vamos verificar a integridade da 'Omelete Francesa' (R001)...")
+            alvo = next((receita for receita in receitas if receita.get('id') == 'R001'), receitas[0])
 
-    # Simulação B: Alguém sabotou o banco de dados e adicionou Pimenta
-    print("\n[ALERTA] Inserindo 'Pimenta' secretamente na receita...")
-    ingredientes_fraudados = receita_alvo['ingredientes'].copy()
-    ingredientes_fraudados.append("Pimenta")
-    
-    status_sabotada = investigador.verificar_integridade(
-        receita_alvo['id'], 
-        receita_alvo['nome'], 
-        ingredientes_fraudados
-    )
-    print(f"Status da '{receita_alvo['nome']}' após sabotagem: {'✔️ Íntegra' if status_sabotada else '❌ Corrompida (Fraude Detectada!)'}")
-    print("="*40)
+            status_ok = investigador.verificar_integridade(alvo['id'], alvo['nome'], alvo['ingredientes'])
+            print(f"Original: {'Íntegra' if status_ok else 'Corrompida'}")
+
+            print("Simulando fraude (adicionando 'Pimenta')...")
+            fraudados = alvo['ingredientes'].copy()
+            fraudados.append("Pimenta")
+            status_fraude = investigador.verificar_integridade(alvo['id'], alvo['nome'], fraudados)
+            print(f"Sabotada: {'Íntegra' if status_fraude else 'Corrompida'}")
+
+        elif opcao == "3":
+            print("\n- MODO CHEF -")
+            try:
+                orcamento = float(input("Insira o orçamento máximo disponível (Ex: 30.00): "))
+                menu, custo_final, avaliacao_final = recomendar_menu_guloso(receitas, orcamento)
+                
+                print("\nMENU RECOMENDADO:")
+                for prato in menu:
+                    print(f" -> {prato['nome']} (Custo: R$ {prato['custo_estimado']:.2f} | Avaliação: {prato['avaliacao']})")
+                print(f"\nResumo: Custo Total = R$ {custo_final:.2f} | Satisfação Total = {avaliacao_final:.1f}")
+            except ValueError:
+                print("Por favor, digite um número válido.")
+
+        elif opcao == "0":
+            print("A encerrar o sistema. Au revoir!")
+            break
+        else:
+            print("Opção inválida. Tente novamente.")
 
 if __name__ == "__main__":
     main()
