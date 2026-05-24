@@ -29,7 +29,7 @@ Sistema de gerenciamento de acervo culinário desenvolvido para otimizar operaç
 * **Explicação Arquitetural:** Implementamos o Problema da Mochila 0/1 no *Modo Chef*. A lógica ordena as receitas pela razão $V_i / C_i$ (Avaliação / Custo) para maximizar a satisfação do cliente dentro de um teto orçamentário.
 * **Instruções de Teste:**
     1. Certifique-se de que o ficheiro `dataset.json` está na pasta `data/`.
-    2. Execute `python3 src/main.py` e selecione o *Modo Chef*.
+    2. Execute `py src/main.py` e selecione o *Modo Chef*.
     3. Insira o orçamento disponível e o sistema retornará a combinação otimizada.
 
 ---

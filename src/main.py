@@ -3,7 +3,54 @@ import os
 
 from hash import TabelaHash
 from trie import ArvoreTrie
-from guloso import recomendar_menu_guloso
+from guloso import recomendar_menu_avancado
+
+# saída colorida e caixas com bordas
+try:
+    from colorama import init as _init_colorama, Fore, Style
+    _init_colorama(autoreset=True)
+    _COLORS = {
+        'red': Fore.RED,
+        'green': Fore.GREEN,
+        'yellow': Fore.YELLOW,
+        'blue': Fore.BLUE,
+        'magenta': Fore.MAGENTA,
+        'cyan': Fore.CYAN,
+        'reset': Style.RESET_ALL
+    }
+except Exception:
+    _COLORS = {
+        'red': '\033[31m',
+        'green': '\033[32m',
+        'yellow': '\033[33m',
+        'blue': '\033[34m',
+        'magenta': '\033[35m',
+        'cyan': '\033[36m',
+        'reset': '\033[0m'
+    }
+
+def color(text, name='reset'):
+    return f"{_COLORS.get(name, '')}{text}{_COLORS.get('reset','')}"
+
+import re
+
+def _strip_ansi(s: str) -> str:
+    ansi_re = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+    return ansi_re.sub('', s)
+
+def print_boxed(title, lines, color_name='cyan'):
+    visible_width = max(len(title), *(len(_strip_ansi(l)) for l in lines)) + 4
+    top = '┌' + '─' * (visible_width - 2) + '┐'
+    sep = '├' + '─' * (visible_width - 2) + '┤'
+    bottom = '└' + '─' * (visible_width - 2) + '┘'
+    print(color(top, color_name))
+    print(color(f"│ {title.center(visible_width-4)} │", color_name))
+    print(color(sep, color_name))
+    for l in lines:
+        pad = visible_width - 4 - len(_strip_ansi(l))
+        print(color(f"│ {l}{' ' * pad} │", color_name))
+    print(color(bottom, color_name))
+#################################################################
 
 def carregar_dados():
     caminho_atual = os.path.dirname(os.path.abspath(__file__))
@@ -12,82 +59,133 @@ def carregar_dados():
     if not os.path.exists(caminho_arquivo):
         print(f"Erro: Ficheiro de base de dados não encontrado em {caminho_arquivo}.")
         return []
-    
     with open(caminho_arquivo, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 def main():
     receitas = carregar_dados()
-    if not receitas:
-        return
+    if not receitas: return
 
-    investigador = TabelaHash(tamanho_inicial=10)
+    investigador = TabelaHash(tamanho_inicial=20)
     busca_rapida = ArvoreTrie()
+    indice_ids = {}
     
     for r in receitas:
-        id_receita = r.get('id')
-        nome = r.get('nome')
-        ingredientes = r.get('ingredientes')
-
-        if id_receita is None or nome is None or ingredientes is None:
-            continue
+        id_receita, nome, ingredientes = r.get('id'), r.get('nome'), r.get('ingredientes')
+        if not id_receita or not nome or not ingredientes: continue
 
         investigador.inserir(id_receita, nome, ingredientes)
+        indice_ids[id_receita] = r
+        
         busca_rapida.inserir(nome, id_receita)
+        for palavra in nome.split():
+            busca_rapida.inserir(palavra, id_receita)
 
     while True:
-        print("\n" + "="*45)
-        print("MENU PRINCIPAL")
-        print("="*45)
-        print("1. Modo Consulta Rápida (Árvore Trie)")
-        print("2. Modo Investigação (Tabela Hash)")
-        print("3. Modo Chef - Recomendação (Guloso)")
-        print("0. Sair")
-        print("="*45)
-        
-        opcao = input("Escolha uma opção: ")
+        linhas = [
+            '1. Modo Consulta Rápida',
+            '2. Modo Investigação',
+            '3. Modo Chef',
+            '0. Sair'
+        ]
+        print_boxed(' Desafio na Cozinha ', linhas, color_name='cyan')
+
+        opcao = input(color('Escolha uma opção: ', 'cyan'))
 
         if opcao == "1":
-            print("\n- MODO BUSCA RÁPIDA -")
-            termo = input("Digite o prefixo da receita: ")
-            resultados = busca_rapida.buscar_prefixo(termo)
-            if resultados:
-                print(f"Receitas encontradas: {resultados}")
-            else:
-                print("Nenhuma receita encontrada com esse prefixo.")
+            print("\nConsulta rápida")
+            print("A) Por Nome | B) Por Categoria | C) Por Ingrediente | D) Por ID")
+            sub_op = input("Escolha o filtro: ").upper()
+            
+            if sub_op == 'A':
+                termo = input("Digite o nome ou parte dele: ")
+                ids = busca_rapida.buscar_prefixo(termo)
+                print(f"Receitas encontradas: {[indice_ids[i]['nome'] for i in ids] if ids else 'Nenhuma.'}")
+            elif sub_op == 'B':
+                cat = input("Digite a categoria (entrada/principal/sobremesa): ").lower()
+                res = [r['nome'] for r in receitas if r.get('categoria') == cat]
+                print(f"Receitas da categoria '{cat}': {res}")
+            elif sub_op == 'C':
+                ing = input("Digite o ingrediente: ").lower()
+                res = [r['nome'] for r in receitas if any(ing in i.lower() for i in r.get('ingredientes', []))]
+                print(f"Receitas contendo '{ing}': {res}")
+            elif sub_op == 'D':
+                id_busca = input("Digite o ID único (ex: R001): ").upper()
+                receita = indice_ids.get(id_busca)
+                print(f"Resultado: {receita['nome']} (Custo: R${receita['custo_estimado']})" if receita else "ID não encontrado.")
 
         elif opcao == "2":
-            print("\n- MODO INVESTIGAÇÃO -")
-            print("Vamos verificar a integridade da 'Omelete Francesa' (R001)...")
-            alvo = next((receita for receita in receitas if receita.get('id') == 'R001'), receitas[0])
+            print("Modo investigação\n")
+            print("1. Verificar integridade de uma receita por ID")
+            print("2. Detectar conteúdos duplicados no sistema")
+            print("3. Detectar conflitos de versões de uma receita")
+            print("4. Validar integridade total do arquivo JSON")
+            
+            sub_opcao = input("Escolha a verificação: ")
+            
+            if sub_opcao == "1":
+                id_verificar = input("Digite o ID da receita para checar: ").upper()
+                r = indice_ids.get(id_verificar)
+                if r:
+                    status = investigador.verificar_integridade(r['id'], r['nome'], r['ingredientes'])
+                    print(f"-> Receita '{r['nome']}': {'Íntegra' if status else 'Alterada'}")
+                else:
+                    print("Código de receita inexistente.")
 
-            status_ok = investigador.verificar_integridade(alvo['id'], alvo['nome'], alvo['ingredientes'])
-            print(f"Original: {'Íntegra' if status_ok else 'Corrompida'}")
+            elif sub_opcao == "2":
+                duplicados, _ = investigador.auditoria_de_duplicados_e_conflitos()
+                print("\nProcurando receitas com conteudo duplicado:")
+                if duplicados:
+                    for ass, lista in duplicados.items():
+                        print(f" -> Alerta: Mesmo conteúdo compartilhado por IDs diferentes: {lista}")
+                else:
+                    print("Nenhuma receita com conteúdo duplicado foi encontrada.")
 
-            print("Simulando fraude (adicionando 'Pimenta')...")
-            fraudados = alvo['ingredientes'].copy()
-            fraudados.append("Pimenta")
-            status_fraude = investigador.verificar_integridade(alvo['id'], alvo['nome'], fraudados)
-            print(f"Sabotada: {'Íntegra' if status_fraude else 'Corrompida'}")
+            elif sub_opcao == "3":
+                _, conflitos = investigador.auditoria_de_duplicados_e_conflitos()
+                print("\nDetectando conflitos de versões (Mesmo nome, conteúdos diferentes):")
+                if conflitos:
+                    for nome_conflito, registros in conflitos.items():
+                        print(f" -> Conflito detectado na receita '{nome_conflito.upper()}':")
+                        for id_rec, ass in registros:
+                            print(f"    * ID: {id_rec} | Assinatura de Conteúdo: {ass}")
+                else:
+                    print("Nenhuma inconsistência ou conflito de versão detectado.")
 
+            elif sub_opcao == "4":
+                print("\nLendo arquivo e comprando com a hash")
+                dados_disco = carregar_dados()
+                violacoes = 0
+                for r in dados_disco:
+                    if not investigador.verificar_integridade(r['id'], r['nome'], r['ingredientes']):
+                        print(f"Violação de integridade: A receita ID {r['id']} foi alterada em disco")
+                        violacoes += 1
+                if violacoes == 0:
+                    print("Sucesso, todos os dados em disco batem com o snapshot da Tabela Hash.")
+                else:
+                    print(f"Auditoria concluída: {violacoes} adulterações encontradas.")
         elif opcao == "3":
-            print("\n- MODO CHEF -")
-            try:
-                orcamento = float(input("Insira o orçamento máximo disponível (Ex: 30.00): "))
-                menu, custo_final, avaliacao_final = recomendar_menu_guloso(receitas, orcamento)
-                
-                print("\nMENU RECOMENDADO:")
-                for prato in menu:
-                    print(f" -> {prato['nome']} (Custo: R$ {prato['custo_estimado']:.2f} | Avaliação: {prato['avaliacao']})")
-                print(f"\nResumo: Custo Total = R$ {custo_final:.2f} | Satisfação Total = {avaliacao_final:.1f}")
-            except ValueError:
-                print("Por favor, digite um número válido.")
+            print("\n- Modo chefe  -")
+            orcamento = float(input("Orçamento Máximo (R$): ") or "999")
+            tempo = float(input("Tempo Máximo (minutos): ") or "999")
+            objetivo = input("Objetivo do Menu (economico / rapido): ").lower()
+            prioridade = input("Priorizar por (avaliacao / popularidade): ").lower()
 
+            restricoes = {'orcamento_maximo': orcamento, 'tempo_maximo': tempo}
+            menu, custo_f, tempo_f = recomendar_menu_avancado(receitas, restricoes, objetivo, prioridade)
+
+            print("\n Menu Recomendado:")
+            if menu:
+                for p in menu:
+                    print(f"-> {p.get('nome','?')} | R$ {p.get('custo_estimado',0)} | {p.get('tempo_preparo','?')}min")
+                    print(f"   Justificativa: {p.get('justificativa','-')}")
+                print(f"Total: R$ {custo_f:.2f} | Tempo Estimado: {tempo_f} min")
+            else:
+                print("Nenhuma sugestão de menu foi gerada.")
+        
         elif opcao == "0":
-            print("A encerrar o sistema. Au revoir!")
+            print("Desligando os fogões. Até logo!")
             break
-        else:
-            print("Opção inválida. Tente novamente.")
-
+            
 if __name__ == "__main__":
     main()
