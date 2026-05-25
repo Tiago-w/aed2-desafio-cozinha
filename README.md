@@ -23,16 +23,21 @@ Sistema de gerenciamento de acervo culinário desenvolvido para otimizar operaç
 
 ---
 
+
 ## [RECUPERAÇÃO P1]
+* **Questão Escolhida:** Algoritmos Gulosos (Heurística baseada no Problema da Mochila 0/1).
 
-* **Questão Escolhida:** Algoritmos Gulosos e Otimização Combinatória.
-* **Explicação Arquitetural:** Implementamos o Problema da Mochila 0/1 no *Modo Chef*. A lógica ordena as receitas pela razão $V_i / C_i$ (Avaliação / Custo) para maximizar a satisfação do cliente dentro de um teto orçamentário.
-* **Instruções de Teste:**
-    1. Certifique-se de que o ficheiro `dataset.json` está na pasta `data/`.
-    2. Execute `py src/main.py` e selecione o *Modo Chef*.
-    3. Insira o orçamento disponível e o sistema retornará a combinação otimizada.
+* **Explicação Arquitetural:** O sistema implementa uma abordagem gulosa (Greedy) para recomendar um menu otimizado. O processo ocorre em três etapas:
 
----
+* **Filtragem Rígida:** Elimina opções que ultrapassem as restrições fixas do usuário (orçamento máximo, tempo de preparo individual ou dificuldade específica).
+
+* **Cálculo de Densidade:** Uma nota de prioridade (Avaliação ou Popularidade) é dividida pelo Custo ou pelo Tempo, dependendo do objetivo ("economico" ou "rapido"), criando uma proporção de custo-benefício.
+
+* **Seleção Gulosa:** As receitas são ordenadas de forma decrescente por essa densidade. O algoritmo itera sobre a lista incluindo os itens mais vantajosos no menu, empilhando-os até que o limite orçamentário (orcamento_maximo) seja atingido.
+
+
+--- 
+
 
 ## Estrutura do Projeto
 * `data/`: `dataset.json` (Banco de dados de receitas).
