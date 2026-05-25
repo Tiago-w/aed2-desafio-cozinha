@@ -55,3 +55,8 @@ Sistema de gerenciamento de acervo culinário desenvolvido para otimizar operaç
 ```bash
 py src/main.py
 ```
+
+### Link do repositório:
+* [(https://github.com/Tiago-w/aed2-desafio-cozinha.git](https://github.com/Tiago-w/aed2-desafio-cozinha.git
+)
+)
