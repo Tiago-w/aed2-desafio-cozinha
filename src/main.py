@@ -150,26 +150,27 @@ def main():
             print("3. Detectar conflitos de versões de uma receita")
             print("4. Validar integridade total do arquivo JSON")
 
+                ###########   ---   id 10 para teste
+            # receita_alvo = indice_ids.get("10")
+            # if receita_alvo:
+            #     nome_receita = receita_alvo["nome"]
+                
+            #    ## hash_original, _ = investigador.gerar_assinatura(
+            #    ##     nome_receita, receita_alvo["ingredientes"]
+            #    ##  )
+
+            #     ingrediente_antigo = receita_alvo["ingredientes"][0]
+            #     receita_alvo["ingredientes"][0] = "Pão"
+
+            #     # hash_nova, _ = investigador.gerar_assinatura(
+            #     # nome_receita, receita_alvo["ingredientes"]
+            #     #     )
+            #     
+                ############
             sub_opcao = input("Escolha a verificação: ")
 
             if sub_opcao == "1":
 
-                ###########   ---   id 10 para teste
-                receita_alvo = indice_ids.get("10")
-                if receita_alvo:
-                    nome_receita = receita_alvo["nome"]
-
-                    hash_original, _ = investigador.gerar_assinatura(
-                        nome_receita, receita_alvo["ingredientes"]
-                    )
-
-                    ingrediente_antigo = receita_alvo["ingredientes"][0]
-                    receita_alvo["ingredientes"][0] = "Pão"
-
-                    hash_nova, _ = investigador.gerar_assinatura(
-                        nome_receita, receita_alvo["ingredientes"]
-                    )
-                ###########
 
                 id_verificar = input(
                     "Digite o ID da receita para checar (tente o ID 10): "
@@ -212,9 +213,9 @@ def main():
 
             elif sub_opcao == "4":
                 print("\nLendo arquivo e comprando com a hash")
-                dados_disco = carregar_dados()
+                
                 violacoes = 0
-                for r in dados_disco:
+                for r in receitas:
                     if not investigador.verificar_integridade(
                         r["id"], r["nome"], r["ingredientes"]
                     ):
