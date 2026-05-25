@@ -184,7 +184,7 @@ def main():
                 print("Nenhuma sugestão de menu foi gerada.")
         
         elif opcao == "0":
-            print("Desligando os fogões. Até logo!")
+            print("Encerrando.")
             break
             
 if __name__ == "__main__":
