@@ -1,20 +1,20 @@
-# 👨‍🍳 Sistema de Gestão: Desafio na Cozinha
+# Sistema de Gestão: Desafio na Cozinha
 
 ![Python](https://img.shields.io/badge/Linguagem-Python-blue.svg)
 ![Estruturas](https://img.shields.io/badge/Estruturas-Hash%20%7C%20Trie%20%7C%20Guloso-success.svg)
-![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-warning.svg)
+![Status](https://img.shields.io/badge/Status-Concluído-warning.svg)
 
 Sistema de gerenciamento de acervo culinário desenvolvido para otimizar operações de busca, organização de ingredientes e recomendação de menus sob restrições. O sistema utiliza um **banco de dados em formato JSON (dataset estático)**, permitindo portabilidade e fácil manipulação dos dados de receitas.
 
 ---
 
-## 👥 Desenvolvedores
+## Desenvolvedores
 * **Tiago Wolowski**
 * **Gustavo Serratte**
 
 ---
 
-## 🏛️ Arquitetura e Estruturas de Dados
+## Arquitetura e Estruturas de Dados
 
 * **Banco de Dados:** Utiliza o formato **JSON** para armazenamento persistente e leitura dinâmica dos dados, garantindo uma estrutura hierárquica eficiente para ingredientes e passos de preparo.
 * **Tabela Hash:** Implementada manualmente para armazenamento primário e verificação de integridade.
@@ -34,14 +34,14 @@ Sistema de gerenciamento de acervo culinário desenvolvido para otimizar operaç
 
 ---
 
-## 📂 Estrutura do Projeto
+## Estrutura do Projeto
 * `data/`: `dataset.json` (Banco de dados de receitas).
 * `src/`: Código-fonte (Implementação das estruturas e lógica principal).
 * `docs/`: Documentação extra.
 
 ---
 
-## 🚀 Guia de Execução
+## Guia de Execução
 
 ### Pré-requisitos
 * Python 3.x
