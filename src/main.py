@@ -110,7 +110,7 @@ def main():
                 res = [r['nome'] for r in receitas if any(ing in i.lower() for i in r.get('ingredientes', []))]
                 print(f"Receitas contendo '{ing}': {res}")
             elif sub_op == 'D':
-                id_busca = input("Digite o ID único (ex: R001): ").upper()
+                id_busca = input("Digite o ID único (ex: 01): ").upper()
                 receita = indice_ids.get(id_busca)
                 print(f"Resultado: {receita['nome']} (Custo: R${receita['custo_estimado']})" if receita else "ID não encontrado.")
 
